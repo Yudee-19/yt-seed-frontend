@@ -6,8 +6,8 @@ import type {
     DownloadResponse,
 } from "../types/api";
 
-// In frontend/src/services/api.ts
-const API_BASE_URL = "http://98.83.245.125:8000";
+// Use relative path - Vercel will rewrite /api/* to your EC2 backend
+const API_BASE_URL = "/api";
 const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
