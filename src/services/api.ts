@@ -7,7 +7,7 @@ import type {
 } from "../types/api";
 
 // In frontend/src/services/api.ts
-const API_BASE_URL = "http://98.83.245.125:8000";
+const API_BASE_URL = "http://52.86.241.28:8000";
 const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
