@@ -202,22 +202,22 @@ function App() {
                 className="absolute inset-0 -z-10"
                 style={{
                     background:
-                        "radial-gradient(125% 125% at 50% 100%, #000000 20%, #010133 100%)",
+                        "radial-gradient(125% 125% at 50% 100%, #000000 20%, #7e22ce50 100%)",
                 }}
             />
             {/* Your Content/Components */}
 
             <div className="container mx-auto px-4 py-8 max-w-7xl">
                 {/* Header */}
-                <Card className="mb-8 border-none shadow-xl bg-[#1A2332] text-primary">
+                <Card className="mb-8 border-none shadow-xl bg-[#1A2332] text-white/80">
                     <CardHeader className="pb-4">
                         <div className="flex items-center gap-3">
-                            <Activity className="h-8 w-8" />
+                            <Activity className="h-8 w-8 text-primary" />
                             <div>
                                 <CardTitle className="text-4xl font-bold">
                                     YouTube Seed AI Pipeline
                                 </CardTitle>
-                                <CardDescription className="text-primary text-xl mt-1">
+                                <CardDescription className=" text-white/80 text-xl mt-1">
                                     YouTube Channel Discovery & Analysis
                                     Platform
                                 </CardDescription>
