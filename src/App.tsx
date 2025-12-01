@@ -44,6 +44,8 @@ function App() {
     const [progress, setProgress] = useState<ProgressResponse | null>(null);
     const [channels, setChannels] = useState<Channel[]>([]);
     const [downloadLoading, setDownloadLoading] = useState(false);
+    const [inputFormat, setInputFormat] = useState("Podcast");
+    const [clientIntent, setClientIntent] = useState("");
 
     // Poll for progress updates and channels on different intervals
     useEffect(() => {
@@ -88,16 +90,26 @@ function App() {
             setMessageType("error");
             return;
         }
+        if (!clientIntent.trim()) {
+            setMessage("Please enter a client intent");
+            setMessageType("error");
+            return;
+        }
 
         setLoading(true);
         setMessage("");
 
         try {
-            const response = await pipelineAPI.startPipeline(sheetUrl);
+            const response = await pipelineAPI.startPipeline(
+                sheetUrl,
+                inputFormat,
+                clientIntent
+            );
             setTaskId(response.task_id);
             setMessage(`${response.message} (Task ID: ${response.task_id})`);
             setMessageType("success");
             setSheetUrl("");
+            setClientIntent("");
         } catch (error: any) {
             setMessage(error.response?.data?.detail || error.message);
             setMessageType("error");
@@ -138,15 +150,15 @@ function App() {
             "Tier",
             "Channel Name",
             "Channel URL",
-            "Reason",
+            "Status",
             "Run Tag",
         ];
         const rows = channels.map((ch) => [
-            ch.tier,
+            ch.Final_Tier,
             ch.Discovered_Channel_Name,
             ch.Discovered_Channel_URL,
-            ch.reason,
-            ch.Discovered_From_Run || ch.run_tag || "",
+            ch.Final_Status,
+            ch.run_tag,
         ]);
 
         const csvContent = [
@@ -180,20 +192,20 @@ function App() {
         }
     };
 
-    const getStatusVariant = (
-        status: string
-    ): "default" | "secondary" | "destructive" | "outline" => {
-        switch (status) {
-            case "completed":
-                return "default";
-            case "started":
-                return "secondary";
-            case "failed":
-                return "destructive";
-            default:
-                return "outline";
-        }
-    };
+    // const getStatusVariant = (
+    //     status: string
+    // ): "default" | "secondary" | "destructive" | "outline" => {
+    //     switch (status) {
+    //         case "completed":
+    //             return "default";
+    //         case "started":
+    //             return "secondary";
+    //         case "failed":
+    //             return "destructive";
+    //         default:
+    //             return "outline";
+    //     }
+    // };
 
     return (
         <div className="min-h-screen w-full relative">
@@ -240,7 +252,7 @@ function App() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex gap-3">
+                            <div className="flex flex-col gap-3">
                                 <Input
                                     placeholder="https://docs.google.com/spreadsheets/d/..."
                                     value={sheetUrl}
@@ -254,6 +266,38 @@ function App() {
                                         handleStartPipeline()
                                     }
                                 />
+                                <div className="flex gap-3">
+                                    <div className="flex-1">
+                                        <label className="block text-sm mb-1 text-white/80">
+                                            Input Format
+                                        </label>
+                                        <select
+                                            value={inputFormat}
+                                            onChange={(e) =>
+                                                setInputFormat(e.target.value)
+                                            }
+                                            disabled={loading}
+                                            className="w-full px-3 py-2 rounded bg-[#232b3e] text-white border border-gray-700"
+                                        >
+                                            <option value="Podcast">
+                                                Podcast
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-sm mb-1 text-white/80">
+                                            Client Intent
+                                        </label>
+                                        <Input
+                                            placeholder="Podcast Growth"
+                                            value={clientIntent}
+                                            onChange={(e) =>
+                                                setClientIntent(e.target.value)
+                                            }
+                                            disabled={loading}
+                                        />
+                                    </div>
+                                </div>
                                 <Button
                                     onClick={handleStartPipeline}
                                     disabled={loading}
@@ -292,7 +336,7 @@ function App() {
                     {/* Progress Section */}
                     <Card className="shadow-lg bg-[#1A2332] border-none">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
+                            <CardTitle className="flex items-center gap-2 text-white">
                                 <Activity className="h-5 w-5" />
                                 Pipeline Progress
                             </CardTitle>
@@ -304,12 +348,12 @@ function App() {
                             {progress?.status === "success" && progress.data ? (
                                 <div className="space-y-6">
                                     {Object.entries(progress.data).map(
-                                        ([status, runTags]) => (
+                                        ([status, runs]) => (
                                             <div
                                                 key={status}
                                                 className="space-y-3"
                                             >
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-2 text-white">
                                                     {getStatusIcon(status)}
                                                     <h3 className="text-sm font-semibold capitalize">
                                                         {status.replace(
@@ -317,25 +361,50 @@ function App() {
                                                             " "
                                                         )}
                                                     </h3>
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="ml-auto"
-                                                    >
-                                                        {runTags.length}
-                                                    </Badge>
                                                 </div>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {runTags.map((tag) => (
-                                                        <Badge
-                                                            key={tag}
-                                                            variant={getStatusVariant(
-                                                                status
-                                                            )}
-                                                            className="px-3 py-1"
-                                                        >
-                                                            {tag}
-                                                        </Badge>
-                                                    ))}
+                                                <div className="flex flex-col gap-2 ml-6">
+                                                    {(runs ?? []).map(
+                                                        (run, idx) => (
+                                                            <div
+                                                                key={
+                                                                    run.run_tag +
+                                                                    idx
+                                                                }
+                                                                className="flex items-center gap-4"
+                                                            >
+                                                                <Badge
+                                                                    // variant="primary"
+                                                                    className="px-2 py-1"
+                                                                >
+                                                                    {
+                                                                        run.run_tag
+                                                                    }
+                                                                </Badge>
+                                                                <span className="text-xs text-white">
+                                                                    {run.current_phase.replace(
+                                                                        /_/g,
+                                                                        " "
+                                                                    )}
+                                                                </span>
+                                                                <div className="flex items-center text-white gap-1">
+                                                                    <span className="text-xs">
+                                                                        {
+                                                                            run.progress_percentage
+                                                                        }
+                                                                        %
+                                                                    </span>
+                                                                    <div className="w-24 h-2 bg-gray-700 rounded">
+                                                                        <div
+                                                                            className="h-2 bg-primary rounded"
+                                                                            style={{
+                                                                                width: `${run.progress_percentage}%`,
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    )}
                                                 </div>
                                                 <Separator />
                                             </div>
@@ -356,7 +425,7 @@ function App() {
                     </Card>
 
                     {/* Download Section */}
-                    <Card className="shadow-lg bg-[#1A2332] border-none">
+                    <Card className="shadow-lg bg-[#1A2332] border-none text-white">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Download className="h-5 w-5" />
@@ -420,23 +489,18 @@ function App() {
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead className="w-[80px]">
-                                                    Tier
-                                                </TableHead>
                                                 <TableHead>
                                                     Channel Name
                                                 </TableHead>
                                                 <TableHead>URL</TableHead>
-                                                <TableHead className="max-w-md">
-                                                    Reason
-                                                </TableHead>
+
                                                 <TableHead>Run Tag</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {channels.map((channel, index) => (
                                                 <TableRow key={index}>
-                                                    <TableCell>
+                                                    {/* <TableCell>
                                                         <Badge
                                                             variant={
                                                                 channel.tier ===
@@ -447,7 +511,7 @@ function App() {
                                                         >
                                                             Tier {channel.tier}
                                                         </Badge>
-                                                    </TableCell>
+                                                    </TableCell> */}
                                                     <TableCell className="font-medium">
                                                         {
                                                             channel.Discovered_Channel_Name
@@ -465,13 +529,9 @@ function App() {
                                                             View Channel
                                                         </a>
                                                     </TableCell>
-                                                    <TableCell className="max-w-md truncate text-muted-foreground">
-                                                        {channel.reason}
-                                                    </TableCell>
+
                                                     <TableCell className="text-muted-foreground">
-                                                        {channel.Discovered_From_Run ||
-                                                            channel.run_tag ||
-                                                            "N/A"}
+                                                        {channel.run_tag}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}

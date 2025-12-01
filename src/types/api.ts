@@ -10,21 +10,32 @@ export interface TaskStatusResponse {
     result?: any;
 }
 
+export interface ProgressRun {
+    run_tag: string;
+    current_phase: string;
+    progress_percentage: number;
+}
+
+export interface ProgressData {
+    in_progress?: ProgressRun[];
+    completed?: ProgressRun[];
+    started?: ProgressRun[];
+    [key: string]: ProgressRun[] | undefined;
+}
+
 export interface ProgressResponse {
     status: string;
-    data?: {
-        [key: string]: string[];
-    };
+    data?: ProgressData;
     message?: string;
 }
 
 export interface Channel {
-    tier: number;
+    Discovered_Channel_ID: string;
     Discovered_Channel_Name: string;
     Discovered_Channel_URL: string;
-    reason: string;
-    Discovered_From_Run?: string;
-    run_tag?: string;
+    Final_Tier: number;
+    Final_Status: string;
+    run_tag: string;
 }
 
 export interface DownloadResponse {

@@ -7,7 +7,7 @@ import type {
 } from "../types/api";
 
 // Use relative path - Vercel will rewrite /api/* to your EC2 backend
-const API_BASE_URL = "/api";
+const API_BASE_URL = "http://54.209.40.8:8000";
 const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
@@ -17,11 +17,19 @@ const api = axios.create({
 
 export const pipelineAPI = {
     /**
-     * Start the pipeline with a Google Sheets URL
+     * Start the pipeline with a Google Sheets URL, input format, and client intent
      */
-    startPipeline: async (sheetUrl: string): Promise<TaskResponse> => {
+    startPipeline: async (
+        sheetUrl: string,
+        inputFormat: string,
+        clientIntent: string
+    ): Promise<TaskResponse> => {
         const response = await api.post<TaskResponse>("/start_pipeline", null, {
-            params: { sheet_url: sheetUrl },
+            params: {
+                sheet_url: sheetUrl,
+                input_format: inputFormat,
+                clients_intent: clientIntent,
+            },
         });
         return response.data;
     },
