@@ -46,6 +46,7 @@ function App() {
     const [downloadLoading, setDownloadLoading] = useState(false);
     const [inputFormat, setInputFormat] = useState("Podcast");
     const [clientIntent, setClientIntent] = useState("");
+    const [isRunning, setIsRunning] = useState(false);
 
     // Poll for progress updates and channels on different intervals
     useEffect(() => {
@@ -53,8 +54,12 @@ function App() {
             try {
                 const data = await pipelineAPI.getProgress();
                 setProgress(data);
+                data.status !== "empty"
+                    ? setIsRunning(true)
+                    : setIsRunning(false);
             } catch (error) {
                 console.error("Error fetching progress:", error);
+                setIsRunning(false);
             }
         };
 
@@ -289,7 +294,7 @@ function App() {
                                             Client Intent
                                         </label>
                                         <Input
-                                            placeholder="Podcast Growth"
+                                            placeholder="Podcast "
                                             value={clientIntent}
                                             onChange={(e) =>
                                                 setClientIntent(e.target.value)
@@ -300,7 +305,7 @@ function App() {
                                 </div>
                                 <Button
                                     onClick={handleStartPipeline}
-                                    disabled={loading}
+                                    disabled={loading || isRunning}
                                     size="lg"
                                     className="px-8"
                                 >
