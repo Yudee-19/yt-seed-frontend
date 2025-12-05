@@ -4,10 +4,11 @@ import type {
     TaskStatusResponse,
     ProgressResponse,
     DownloadResponse,
+    QueueStatusAllResponse,
 } from "../types/api";
 
 // Use relative path - Vercel will rewrite /api/* to your EC2 backend
-const API_BASE_URL = "www.google.com/api";
+const API_BASE_URL = "http://54.209.40.8:8000/";
 const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
@@ -53,8 +54,22 @@ export const pipelineAPI = {
     /**
      * Download all Tier 1 and Tier 2 channels from completed runs
      */
-    downloadTier1And2: async (): Promise<DownloadResponse> => {
-        const response = await api.get<DownloadResponse>("/download_tier1_2");
+    downloadTier1And2: async (
+        pipeline_id: string
+    ): Promise<DownloadResponse> => {
+        const response = await api.get<DownloadResponse>(
+            `/download_run_results/${pipeline_id}`
+        );
+        return response.data;
+    },
+
+    /**
+     * Get the status of all lanes in the dashboard
+     */
+    getQueueStatusAll: async (): Promise<QueueStatusAllResponse> => {
+        const response = await api.get<QueueStatusAllResponse>(
+            "/queue_status_all"
+        );
         return response.data;
     },
 };
