@@ -8,7 +8,7 @@ import type {
 } from "../types/api";
 
 // Use relative path - Vercel will rewrite /api/* to your EC2 backend
-const API_BASE_URL = "http://54.209.40.8:8000/";
+const API_BASE_URL = "/api";
 const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
