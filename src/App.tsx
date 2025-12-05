@@ -177,7 +177,6 @@ function App() {
     const handleDownloadTabChannels = async () => {
         setTabLoading(true);
         setMessage("");
-        alert("Downloading channels for " + selectedTab);
         const pipelineId = pipelineIds[selectedTab];
         if (!pipelineId) {
             setTabChannels([]);
@@ -471,7 +470,7 @@ function App() {
                                 </div>
                                 <Button
                                     onClick={handleStartPipeline}
-                                    disabled={loading || isRunning}
+                                    disabled={loading}
                                     size="lg"
                                     className="px-8"
                                 >
@@ -692,9 +691,7 @@ function App() {
                                                                 <TableHead>
                                                                     URL
                                                                 </TableHead>
-                                                                <TableHead>
-                                                                    Run Tag
-                                                                </TableHead>
+
                                                                 <TableHead>
                                                                     Seed Channel
                                                                     Name
@@ -730,11 +727,7 @@ function App() {
                                                                                 Channel
                                                                             </a>
                                                                         </TableCell>
-                                                                        <TableCell className="text-muted-foreground">
-                                                                            {
-                                                                                channel.run_tag
-                                                                            }
-                                                                        </TableCell>
+
                                                                         <TableCell className="text-muted-foreground">
                                                                             {
                                                                                 channel.Seed_Channel_Name
