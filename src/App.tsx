@@ -51,7 +51,7 @@ function App() {
     // const [channels, setChannels] = useState<Channel[]>([]);
     const [inputFormat, setInputFormat] = useState("");
     const [clientIntent, setClientIntent] = useState("");
-    const [isRunning, setIsRunning] = useState(false);
+    const [_isRunning, setIsRunning] = useState(false);
     const [_dashboard, setDashboard] = useState<QueueStatusAllResponse | null>(
         null
     );
